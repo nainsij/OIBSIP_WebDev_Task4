@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Basic To-Do Web App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">📝 Basic To-Do Web App</h2>
+
+    <div class="input-group mb-4">
+      <input type="text" id="taskInput" class="form-control" placeholder="Enter your task">
+      <button class="btn btn-primary" onclick="addTask()">Add Task</button>
+    </div>
+
+    <h4>Pending Tasks</h4>
+    <ul id="pendingTasks" class="list-group mb-4"></ul>
+
+    <h4>Completed Tasks</h4>
+    <ul id="completedTasks" class="list-group"></ul>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const taskText = input.value.trim();
+      if (!taskText) return;
+
+      const newTask = {
+        id: Date.now(),
+        text: taskText,
+        completed: false,
+        createdAt: new Date(),
+        completedAt: null
+      };
+
+      tasks.push(newTask);
+      input.value = '';
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const pendingList = document.getElementById("pendingTasks");
+      const completedList = document.getElementById("completedTasks");
+      pendingList.innerHTML = '';
+      completedList.innerHTML = '';
+
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+        const span = document.createElement('span');
+        span.className = task.completed ? 'completed' : '';
+        span.textContent = `${task.text} (${task.completed ? formatDate(task.completedAt) : formatDate(task.createdAt)})`;
+
+        const btnGroup = document.createElement('div');
+
+        const editBtn = document.createElement('button');
+        editBtn.className = "btn btn-sm btn-warning me-1";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => editTask(task.id);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = "btn btn-sm btn-danger me-1";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => deleteTask(task.id);
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = "btn btn-sm btn-success";
+        toggleBtn.textContent = task.completed ? "Undo" : "Done";
+        toggleBtn.onclick = () => toggleComplete(task.id);
+
+        btnGroup.append(editBtn, deleteBtn, toggleBtn);
+        li.append(span, btnGroup);
+
+        if (task.completed) {
+          completedList.appendChild(li);
+        } else {
+          pendingList.appendChild(li);
+        }
+      });
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      const newText = prompt("Edit your task:", task.text);
+      if (newText !== null && newText.trim() !== '') {
+        task.text = newText.trim();
+        renderTasks();
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      renderTasks();
+    }
+
+    function toggleComplete(id) {
+      const task = tasks.find(t => t.id === id);
+      task.completed = !task.completed;
+      task.completedAt = task.completed ? new Date() : null;
+      renderTasks();
+    }
+
+    function formatDate(date) {
+      return new Date(date).toLocaleString();
+    }
+  </script>
+</body>
+</html>
